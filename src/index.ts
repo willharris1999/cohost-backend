@@ -3,6 +3,12 @@ import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 
 const app = express();
+const PORT = process.env.PORT || 3001;
+
+// Log environment for debugging
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('DATABASE_URL starts with:', process.env.DATABASE_URL?.substring(0, 30));
+
 const prisma = new PrismaClient({
   datasources: {
     db: {
@@ -10,7 +16,6 @@ const prisma = new PrismaClient({
     },
   },
 });
-const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());
@@ -22,6 +27,7 @@ app.get('/health', async (req, res) => {
     await prisma.$queryRaw`SELECT 1`;
     res.json({ status: 'ok', database: 'connected', timestamp: new Date().toISOString() });
   } catch (error: any) {
+    console.error('Database error:', error);
     res.json({ status: 'ok', database: 'error', error: error.message, timestamp: new Date().toISOString() });
   }
 });
