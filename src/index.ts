@@ -1,9 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
-
-dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
@@ -13,9 +10,14 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(cors());
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// Health check with DB test
+app.get('/health', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ok', database: 'connected', timestamp: new Date().toISOString() });
+  } catch (error: any) {
+    res.json({ status: 'ok', database: 'error', error: error.message, timestamp: new Date().toISOString() });
+  }
 });
 
 // Get all tasks
@@ -25,9 +27,9 @@ app.get('/api/tasks', async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
     res.json(tasks);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching tasks:', error);
-    res.status(500).json({ error: 'Failed to fetch tasks' });
+    res.status(500).json({ error: 'Failed to fetch tasks', details: error.message });
   }
 });
 
@@ -53,9 +55,9 @@ app.post('/api/tasks', async (req, res) => {
     });
 
     res.status(201).json(task);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating task:', error);
-    res.status(500).json({ error: 'Failed to create task' });
+    res.status(500).json({ error: 'Failed to create task', details: error.message });
   }
 });
 
@@ -76,9 +78,9 @@ app.patch('/api/tasks/:id', async (req, res) => {
     });
 
     res.json(task);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating task:', error);
-    res.status(500).json({ error: 'Failed to update task' });
+    res.status(500).json({ error: 'Failed to update task', details: error.message });
   }
 });
 
@@ -88,9 +90,9 @@ app.delete('/api/tasks/:id', async (req, res) => {
     const { id } = req.params;
     await prisma.task.delete({ where: { id } });
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting task:', error);
-    res.status(500).json({ error: 'Failed to delete task' });
+    res.status(500).json({ error: 'Failed to delete task', details: error.message });
   }
 });
 
