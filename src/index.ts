@@ -35,7 +35,9 @@ app.get('/health', async (req, res) => {
 // Get all tasks
 app.get('/api/tasks', async (req, res) => {
   try {
+    const userId = req.query.userId as string || 'default-user';
     const tasks = await prisma.task.findMany({
+      where: { userId },
       orderBy: { createdAt: 'desc' }
     });
     res.json(tasks);
