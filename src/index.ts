@@ -19,7 +19,10 @@ const prisma = new PrismaClient({
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: true, // Allow all origins including chrome-extension://
+  credentials: true
+}));
 
 // Health check with DB test
 app.get('/health', async (req, res) => {
@@ -50,7 +53,7 @@ app.get('/api/tasks', async (req, res) => {
 // Create task
 app.post('/api/tasks', async (req, res) => {
   try {
-    const { title, listingId, type, notes, dueDate } = req.body;
+    const { title, listingId, type, notes, dueDate, userId } = req.body;
     
     if (!title) {
       return res.status(400).json({ error: 'Title required' });
@@ -60,7 +63,7 @@ app.post('/api/tasks', async (req, res) => {
       data: {
         title,
         listingId: listingId || 'default',
-        userId: 'default-user',
+        userId: userId || 'default-user',
         type: type || 'custom',
         notes: notes || null,
         dueDate: dueDate ? new Date(dueDate) : null,
