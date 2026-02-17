@@ -48,6 +48,7 @@ model Task {
   id                    String   @id @default(cuid())
   userId                String
   listingId             String
+listingName           String?
   type                  String   // "refill", "clean", "maintenance", "message", "custom"
   title                 String
   status                String   @default("pending") // "pending", "in-progress", "completed"
