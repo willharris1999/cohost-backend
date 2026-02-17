@@ -53,7 +53,7 @@ app.get('/api/tasks', async (req, res) => {
 // Create task
 app.post('/api/tasks', async (req, res) => {
   try {
-    const { title, listingId, type, notes, dueDate, userId } = req.body;
+    const { title, listingId, listingName, type, notes, dueDate, userId } = req.body;
     
     if (!title) {
       return res.status(400).json({ error: 'Title required' });
@@ -63,6 +63,7 @@ app.post('/api/tasks', async (req, res) => {
       data: {
         title,
         listingId: listingId || 'default',
+        listingName: listingName || null,
         userId: userId || 'default-user',
         type: type || 'custom',
         notes: notes || null,
