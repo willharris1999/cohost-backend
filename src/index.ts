@@ -25,7 +25,55 @@ app.use(cors({
   origin: true, // Allow all origins including chrome-extension://
   credentials: true
 }));
+// AI: Extract tasks from conversation
+app.post('/api/ai/extract-tasks', async (req, res) => {
+  try {
+    const { conversation, listingName, guestName } = req.body;
+    
+    if (!conversation) {
+      return res.status(400).json({ error: 'Conversation text required' });
+    }
 
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: `You are an assistant for Airbnb co-hosts. Extract actionable tasks from this conversation.
+
+Listing: ${listingName || 'Unknown'}
+Guest: ${guestName || 'Guest'}
+
+Conversation:
+${conversation}
+
+Extract tasks the host needs to do. Return ONLY a JSON array with objects containing:
+- title: Brief task description
+- type: One of "clean", "maintenance", "checkin", "checkout", "refill", "message", "custom"  
+- dueDate: YYYY-MM-DD format if mentioned, otherwise null
+- priority: "high", "medium", or "low"
+- notes: Relevant context
+
+If no tasks found, return []. Example:
+[{"title": "Arrange early check-in", "type": "checkin", "dueDate": "2026-02-20", "priority": "high", "notes": "Guest arriving at 1pm"}]`
+      }]
+    });
+
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    let tasks = [];
+    try {
+      const jsonMatch = responseText.match(/\\[[\\s\\S]*\\]/);
+      if (jsonMatch) tasks = JSON.parse(jsonMatch[0]);
+    } catch (e) {
+      console.error('Failed to parse AI response:', responseText);
+    }
+
+    res.json({ tasks });
+  } catch (error: any) {
+    console.error('AI extraction error:', error);
+    res.status(500).json({ error: 'Failed to extract tasks', details: error.message });
+  }
+});
 // Health check with DB test
 app.get('/health', async (req, res) => {
   try {
