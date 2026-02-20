@@ -8,11 +8,11 @@
     "build": "prisma generate"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "@prisma/client": "^5.22.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "@anthropic-ai/sdk": "^0.39.0",
+    "express": "^4.18.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
