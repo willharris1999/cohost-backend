@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 
+import Anthropic from '@anthropic-ai/sdk';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -16,6 +17,7 @@ const prisma = new PrismaClient({
     },
   },
 });
+const anthropic = new Anthropic();
 
 // Middleware
 app.use(express.json());
