@@ -59,13 +59,20 @@ If no tasks found, return []. Example:
       }]
     });
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+    console.log('=== RAW AI RESPONSE ===', responseText);
     let tasks = [];
     try {
-      const jsonMatch = responseText.match(/\\[[\\s\\S]*\\]/);
-      if (jsonMatch) tasks = JSON.parse(jsonMatch[0]);
+      tasks = JSON.parse(responseText);
     } catch (e) {
-      console.error('Failed to parse AI response:', responseText);
+      const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        try {
+          tasks = JSON.parse(jsonMatch[0]);
+        } catch (e2) {
+          console.error('Failed to parse AI response:', responseText);
+        }
+      }
     }
 
     res.json({ tasks });
