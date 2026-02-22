@@ -1,4 +1,3 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,95 +8,86 @@ datasource db {
 }
 
 model User {
-  id                    String   @id @default(cuid())
-  email                 String   @unique
-  firebaseUid           String?  @unique
-  subscriptionTier      String   @default("free") // "free" or "pro"
-  stripeCustomerId      String?  @unique
-  stripePriceId         String?
-  subscriptionStatus    String?  // "active", "trialing", "past_due", "canceled"
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  listings              Listing[]
-  transactions          Transaction[]
-  templates             MessageTemplate[]
+  id                 String            @id @default(cuid())
+  email              String            @unique
+  firebaseUid        String?           @unique
+  subscriptionTier   String            @default("free")
+  isPro              Boolean           @default(false)
+  stripeCustomerId   String?           @unique
+  stripePriceId      String?
+  subscriptionStatus String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  listings           Listing[]
+  transactions       Transaction[]
+  templates          MessageTemplate[]
 
   @@map("users")
 }
 
 model Listing {
-  id                    String   @id @default(cuid())
-  userId                String
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  airbnbListingId       String
-  name                  String
-  address               String?
-  pmsConnectionId       String?
-  pmsProvider           String?   // "hostaway", "guesty", "lodgify"
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  transactions          Transaction[]
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  airbnbListingId String
+  name            String
+  address         String?
+  pmsConnectionId String?
+  pmsProvider     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  transactions    Transaction[]
 
   @@unique([userId, airbnbListingId])
   @@map("listings")
 }
 
 model Task {
-  id                    String   @id @default(cuid())
-  userId                String
-  listingId             String
-listingName           String?
-  type                  String   // "refill", "clean", "maintenance", "message", "custom"
-  title                 String
-  status                String   @default("pending") // "pending", "in-progress", "completed"
-  dueDate               DateTime?
-  notes                 String?
-  aiGenerated           Boolean  @default(false)
-  sourceMessageId       String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id            String    @id @default(cuid())
+  userId        String
+  listingId     String
+  listingName   String?
+  type          String
+  title         String
+  status        String    @default("pending")
+  dueDate       DateTime?
+  notes         String?
+  aiGenerated   Boolean   @default(false)
+  sourceMessageId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@map("tasks")
 }
 
 model MessageTemplate {
-  id                    String   @id @default(cuid())
-  userId                String
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name                  String
-  category              String   // "checkin", "checkout", "issues", "general"
-  content               String
-  variables             String?  // JSON string of allowed variables
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  category  String
+  content   String
+  variables String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("message_templates")
 }
 
 model Transaction {
-  id                    String   @id @default(cuid())
-  userId                String
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  listingId             String
-  listing               Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  amount                Float
-  type                  String   // "income", "expense", "payout"
-  category              String?
-  description           String?
-  payoutStatus          String?  // "pending", "completed", "failed"
-  payoutMethod          String?  // "stripe_connect", "bank_transfer"
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId     String
+  listing       Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  amount        Float
+  type          String
+  category      String?
+  description   String?
+  payoutStatus  String?
+  payoutMethod  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("transactions")
-}
-
-model User {
-  id               String   @id
-  isPro            Boolean  @default(false)
-  stripeCustomerId String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
 }
