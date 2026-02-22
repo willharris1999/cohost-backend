@@ -93,3 +93,11 @@ model Transaction {
 
   @@map("transactions")
 }
+
+model User {
+  id               String   @id
+  isPro            Boolean  @default(false)
+  stripeCustomerId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
